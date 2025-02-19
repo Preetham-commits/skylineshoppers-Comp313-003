@@ -24,3 +24,6 @@ Order history and tracking
 Technologies Used
 Backend: Node.js, Express, MongoDB
 Frontend: React
+
+
+![image](https://github.com/user-attachments/assets/a8da00f7-f768-4002-83b3-6455a612f48a)
