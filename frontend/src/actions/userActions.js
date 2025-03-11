@@ -27,6 +27,11 @@ import {
 } from '../constants/userConstants'
 import { ORDER_LIST_MY_RESET } from '../constants/orderConstants'
 
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:3000'
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+axios.defaults.withCredentials = true
+
 export const login = (email, password) => async (dispatch) => {
   try {
     dispatch({
@@ -42,7 +47,7 @@ export const login = (email, password) => async (dispatch) => {
     console.log('Attempting login with:', { email })
 
     const { data } = await axios.post(
-      'http://localhost:6000/api/users/login',
+      `/api/users/login`,
       { email, password },
       config
     )
@@ -92,7 +97,7 @@ export const register = (name, email, password) => async (dispatch) => {
     }
 
     const { data } = await axios.post(
-      'http://localhost:6000/api/users/signup',
+      `/api/users/signup`,
       { name, email, password },
       config
     )
