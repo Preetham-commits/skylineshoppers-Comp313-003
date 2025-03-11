@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Container } from 'react-bootstrap';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Home from "./pages/Home";
+import HomeScreen from "./screens/HomeScreen";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
@@ -18,7 +18,10 @@ const App = () => {
       <main className="py-3">
         <Container>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<HomeScreen />} exact />
+            <Route path="/search/:keyword" element={<HomeScreen />} exact />
+            <Route path="/page/:pageNumber" element={<HomeScreen />} exact />
+            <Route path="/search/:keyword/page/:pageNumber" element={<HomeScreen />} exact />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import generateToken from '../utils/generateToken.js'
 
 // Get all users
 export const getUser = async (req, res) => {
@@ -27,23 +28,52 @@ export const getUserById = async (req, res) => {
 
 // Create a user
 export const createUser = async (req, res) => {
-    const { firstName, lastName, email, password, address, city, phoneNumber } = req.body;
+  try {
+    const { name, email, password } = req.body
 
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: "Email is already in use" });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ firstName, lastName, email, password: hashedPassword, address, city, phoneNumber });
-
-        await newUser.save();
-        res.status(201).json({ message: "User created successfully", user: newUser });
-    } catch (error) {
-        res.status(500).json({ error: "Error creating user" });
+    // Validate input
+    if (!name || !email || !password) {
+      res.status(400)
+      throw new Error('Please provide all required fields')
     }
-};
+
+    // Check if user exists
+    const userExists = await User.findOne({ email })
+
+    if (userExists) {
+      res.status(400)
+      throw new Error('User already exists')
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password, // Password will be hashed by the pre-save middleware
+    })
+
+    if (user) {
+      // Generate token
+      const token = generateToken(user._id)
+
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        token: token,
+      })
+    } else {
+      res.status(400)
+      throw new Error('Invalid user data')
+    }
+  } catch (error) {
+    console.error('Create user error:', error)
+    res.status(error.status || 500).json({
+      message: error.message || 'Error creating user',
+    })
+  }
+}
 
 // Update a user
 export const updateUser = async (req, res) => {
@@ -73,22 +103,52 @@ export const deleteUser = async (req, res) => {
 
 // User Login
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+  try {
+    const { email, password } = req.body
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ error: "Invalid email or password" });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: "Invalid email or password" });
-        }
-
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        res.json({ message: "Login successful", token });
-    } catch (error) {
-        res.status(500).json({ error: "Error logging in" });
+    // Add validation
+    if (!email || !password) {
+      res.status(400)
+      throw new Error('Please provide email and password')
     }
-};
+
+    // Find user by email
+    const user = await User.findOne({ email })
+    
+    // Debug log
+    console.log('Login attempt:', { email, userFound: !!user })
+
+    if (!user) {
+      res.status(401)
+      throw new Error('Invalid email or password')
+    }
+
+    // Check password
+    const isMatch = await user.matchPassword(password)
+    
+    // Debug log
+    console.log('Password match:', isMatch)
+
+    if (isMatch) {
+      // Generate token
+      const token = generateToken(user._id)
+      
+      // Send response
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        token: token,
+      })
+    } else {
+      res.status(401)
+      throw new Error('Invalid email or password')
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+    res.status(error.status || 500).json({
+      message: error.message || 'Internal server error',
+    })
+  }
+}
