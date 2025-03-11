@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form } from 'react-bootstrap'
 import Rating from '../components/Rating'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import Meta from '../components/Meta'
-
 import {
   listProductDetails,
   createProductReview,
 } from '../actions/productActions'
 import { PRODUCT_CREATE_REVIEW_RESET } from '../constants/productConstants'
 
-const ProductScreen = ({ history, match }) => {
+const ProductScreen = () => {
   const [qty, setQty] = useState(1)
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { id } = useParams()
 
   const productDetails = useSelector((state) => state.productDetails)
-  const { loading, error, product } = productDetails
+  const { loading, error, product = {} } = productDetails
 
   const userLogin = useSelector((state) => state.userLogin)
   const { userInfo } = userLogin
@@ -38,20 +39,20 @@ const ProductScreen = ({ history, match }) => {
       setRating(0)
       setComment('')
     }
-    if (!product._id || product._id !== match.params.id) {
-      dispatch(listProductDetails(match.params.id))
+    if (!product._id || product._id !== id) {
+      dispatch(listProductDetails(id))
       dispatch({ type: PRODUCT_CREATE_REVIEW_RESET })
     }
-  }, [dispatch, match.params.id, product._id])
+  }, [dispatch, id, successProductReview, product._id])
 
   const addToCartHandler = () => {
-    history.push(`/cart/${match.params.id}?qty=${qty}`)
+    navigate(`/cart/${id}?qty=${qty}`)
   }
 
   const submitHandler = (e) => {
     e.preventDefault()
     dispatch(
-      createProductReview(match.params.id, {
+      createProductReview(id, {
         rating,
         comment,
       })
@@ -152,9 +153,9 @@ const ProductScreen = ({ history, match }) => {
           <Row>
             <Col md={6}>
               <h2>Reviews</h2>
-              {product.reviews.length === 0 && <Message>No Reviews</Message>}
+              {product.reviews?.length === 0 && <Message>No Reviews</Message>}
               <ListGroup variant='flush'>
-                {product.reviews.map((review) => (
+                {product.reviews?.map((review) => (
                   <ListGroup.Item key={review._id}>
                     <strong>{review.name}</strong>
                     <Rating value={review.rating} />
