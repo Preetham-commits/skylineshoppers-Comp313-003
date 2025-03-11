@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Configure CORS properly
 app.use(cors({
-  origin: 'http://localhost:3000', // Your frontend URL
+  origin: 'http://localhost:3001', // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
