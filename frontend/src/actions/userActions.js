@@ -39,11 +39,15 @@ export const login = (email, password) => async (dispatch) => {
       },
     }
 
+    console.log('Attempting login with:', { email })
+
     const { data } = await axios.post(
-      '/api/users/login',
+      'http://localhost:6000/api/users/login',
       { email, password },
       config
     )
+
+    console.log('Login response:', data)
 
     dispatch({
       type: USER_LOGIN_SUCCESS,
@@ -52,6 +56,7 @@ export const login = (email, password) => async (dispatch) => {
 
     localStorage.setItem('userInfo', JSON.stringify(data))
   } catch (error) {
+    console.error('Login error:', error.response || error)
     dispatch({
       type: USER_LOGIN_FAIL,
       payload:
@@ -87,7 +92,7 @@ export const register = (name, email, password) => async (dispatch) => {
     }
 
     const { data } = await axios.post(
-      '/api/users',
+      'http://localhost:6000/api/users/signup',
       { name, email, password },
       config
     )

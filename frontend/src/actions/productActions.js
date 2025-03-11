@@ -24,14 +24,24 @@ import {
 } from '../constants/productConstants'
 import { logout } from './userActions'
 
-export const listProducts = (keyword = '', pageNumber = '') => async (
-  dispatch
-) => {
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:3000'
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+
+export const listProducts = (keyword = '', pageNumber = '') => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST })
 
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true
+    }
+
     const { data } = await axios.get(
-      `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
+      `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`,
+      config
     )
 
     dispatch({
@@ -230,7 +240,14 @@ export const listTopProducts = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_TOP_REQUEST })
 
-    const { data } = await axios.get(`/api/products/top`)
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true
+    }
+
+    const { data } = await axios.get(`/api/products/top`, config)
 
     dispatch({
       type: PRODUCT_TOP_SUCCESS,
