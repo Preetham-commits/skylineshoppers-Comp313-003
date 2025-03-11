@@ -1,20 +1,22 @@
 import React, { useState } from 'react'
 import { Form, Button } from 'react-bootstrap'
+import { useNavigate } from 'react-router-dom'
 
-const SearchBox = ({ history }) => {
+const SearchBox = () => {
+  const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
 
   const submitHandler = (e) => {
     e.preventDefault()
     if (keyword.trim()) {
-      history.push(`/search/${keyword}`)
+      navigate(`/search/${keyword}`)
     } else {
-      history.push('/')
+      navigate('/')
     }
   }
 
   return (
-    <Form onSubmit={submitHandler} inline>
+    <Form onSubmit={submitHandler} className='d-flex'>
       <Form.Control
         type='text'
         name='q'

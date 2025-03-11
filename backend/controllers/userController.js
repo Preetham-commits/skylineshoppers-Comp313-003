@@ -1,10 +1,9 @@
-const User = require("../models/userModel");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
 
 // Get all users
-exports.getUser = async (req, res) => {
+export const getUser = async (req, res) => {
     try {
         const users = await User.find();
         res.json(users);
@@ -14,7 +13,7 @@ exports.getUser = async (req, res) => {
 };
 
 // Get a single user by ID
-exports.getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
@@ -27,11 +26,10 @@ exports.getUserById = async (req, res) => {
 };
 
 // Create a user
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
     const { firstName, lastName, email, password, address, city, phoneNumber } = req.body;
 
     try {
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: "Email is already in use" });
@@ -48,7 +46,7 @@ exports.createUser = async (req, res) => {
 };
 
 // Update a user
-exports.updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!updatedUser) {
@@ -61,7 +59,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Delete a user
-exports.deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const deletedUser = await User.findByIdAndDelete(req.params.id);
         if (!deletedUser) {
@@ -74,7 +72,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // User Login
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
