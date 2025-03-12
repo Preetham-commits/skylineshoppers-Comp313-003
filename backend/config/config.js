@@ -1,9 +1,6 @@
-
-// Exporting the MongoDB Atlas connection string
 const config = {
     // Change this to your own MongoDB URI
-    "ATLASDB": "mongodb+srv://27navdeep2000:Sahota100$@cluster0.n0siw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0mongodb+srv://27navdeep2000:Sahota100$@cluster0.n0siw.mongodb.net/testsky?retryWrites=true&w=majority",
+    "ATLASDB": "mongodb+srv://saipreetham396:user123@cluster0.h17c9ml.mongodb.net/ShoppingCart?retryWrites=true&w=majority&appName=Cluster0",
 };
 
 export default config;
-
