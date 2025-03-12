@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
     // Connecting to MongoDB using the connection string from the config
-    mongoose.connect('mongodb+srv://saipreetham396:saipreetham396@cluster0.biam1ku.mongodb.net/testsky?retryWrites=true&w=majority&appName=Cluster0');
+    mongoose.connect('mongodb+srv://27navdeep2000:Sahota100$@cluster0.n0siw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 
     // Creating a connection instance
     let mongodb = mongoose.connection;
