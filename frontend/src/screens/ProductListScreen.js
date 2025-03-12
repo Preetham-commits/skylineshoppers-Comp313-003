@@ -1,8 +1,8 @@
-
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { LinkContainer } from 'react-router-bootstrap'
-import { Table, Button, Row, Col } from 'react-bootstrap'
+import { Table, Button, Row, Col, Form } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import Paginate from '../components/Paginate'
@@ -13,13 +13,23 @@ import {
 } from '../actions/productActions'
 import { PRODUCT_CREATE_RESET } from '../constants/productConstants'
 
-const ProductListScreen = ({ history, match }) => {
-  const pageNumber = match.params.pageNumber || 1
+const ProductListScreen = () => {
+  const [name, setName] = useState('')
+  const [price, setPrice] = useState(0)
+  const [image, setImage] = useState('')
+  const [brand, setBrand] = useState('')
+  const [category, setCategory] = useState('')
+  const [countInStock, setCountInStock] = useState(0)
+  const [showForm, setShowForm] = useState(false)  // State to control form visibility
+
+  const { pageNumber: pageParam } = useParams()
+  const pageNumber = pageParam || 1
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const productList = useSelector((state) => state.productList)
-  const { loading, error, products, page, pages } = productList
+  const { loading, error, products = [], page, pages } = productList
 
   const productDelete = useSelector((state) => state.productDelete)
   const {
@@ -43,17 +53,17 @@ const ProductListScreen = ({ history, match }) => {
     dispatch({ type: PRODUCT_CREATE_RESET })
 
     if (!userInfo || !userInfo.isAdmin) {
-      history.push('/login')
+      navigate('/login')
     }
 
     if (successCreate) {
-      history.push(`/admin/product/${createdProduct._id}/edit`)
+      navigate(`/admin/product/${createdProduct._id}/edit`)
     } else {
       dispatch(listProducts('', pageNumber))
     }
   }, [
     dispatch,
-    history,
+    navigate,
     userInfo,
     successDelete,
     successCreate,
@@ -67,8 +77,18 @@ const ProductListScreen = ({ history, match }) => {
     }
   }
 
-  const createProductHandler = () => {
-    dispatch(createProduct())
+  const createProductHandler = (e) => {
+    e.preventDefault()  // Prevent default form submission
+    const newProduct = {
+      name,
+      price,
+      image,
+      brand,
+      category,
+      countInStock,
+    }
+    dispatch(createProduct(newProduct))  
+    setShowForm(false)  
   }
 
   return (
@@ -78,11 +98,90 @@ const ProductListScreen = ({ history, match }) => {
           <h1>Products</h1>
         </Col>
         <Col className='text-right'>
-          <Button className='my-3' onClick={createProductHandler}>
+          <Button className='my-3' onClick={() => setShowForm(true)}>
             <i className='fas fa-plus'></i> Create Product
           </Button>
         </Col>
       </Row>
+
+      {/* Create Product Form */}
+      {showForm && (
+        <Form onSubmit={createProductHandler} className='my-3'>
+          <Form.Group controlId='name'>
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter product name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId='price'>
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+              type='number'
+              placeholder='Enter price'
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId='image'>
+            <Form.Label>Image URL</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter image URL'
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId='brand'>
+            <Form.Label>Brand</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter brand'
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId='category'>
+            <Form.Label>Category</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Enter category'
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId='countInStock'>
+            <Form.Label>Count In Stock</Form.Label>
+            <Form.Control
+              type='number'
+              placeholder='Enter count in stock'
+              value={countInStock}
+              onChange={(e) => setCountInStock(e.target.value)}
+              required
+            />
+          </Form.Group>
+
+          <Button type='submit' variant='primary'>
+            Create Product
+          </Button>
+          <Button variant='light' onClick={() => setShowForm(false)} className='ml-2'>
+            Cancel
+          </Button>
+        </Form>
+      )}
+
       {loadingDelete && <Loader />}
       {errorDelete && <Message variant='danger'>{errorDelete}</Message>}
       {loadingCreate && <Loader />}
