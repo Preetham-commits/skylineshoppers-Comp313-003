@@ -16,7 +16,8 @@ import ShippingScreen from './screens/ShippingScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import PlaceOrderScreen from './screens/PlaceOrderScreen'; 
 import UserListScreen from './screens/UserListScreen'
-import UserEditScreen from './screens/UserEditScreen'// Import PlaceOrderScreen
+import UserEditScreen from './screens/UserEditScreen'
+import OrderListScreen from './screens/OrderListScreen'// Import PlaceOrderScreen
 
 // Protected Route Component
 const PrivateRoute = ({ children }) => {
@@ -54,6 +55,7 @@ const App = () => {
             <Route path="/cart/:id?" element={<CartScreen />} />
             <Route path='/admin/userlist' element={<UserListScreen />} />
             <Route path='/admin/user/:id/edit' element={<UserEditScreen />} />
+            <Route path='/admin/orderlist' element={<OrderListScreen />} />
             <Route 
               path='/shipping' 
               element={

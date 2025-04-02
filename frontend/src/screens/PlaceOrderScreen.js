@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Message from '../components/Message'
 import CheckoutSteps from '../components/CheckoutSteps'
-import { useNavigate } from 'react-router-dom'
+import { createOrder } from '../actions/orderActions'
+import { CART_CLEAR_ITEMS } from '../constants/cartConstants'
+import Loader from '../components/Loader'
 
 const PlaceOrderScreen = () => {
-  const navigate = useNavigate() // Initialize navigate
-  const [orderPlaced, setOrderPlaced] = useState(false)
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [showSuccess, setShowSuccess] = useState(false)
+  
   const cart = useSelector((state) => state.cart)
+  const { shippingAddress, paymentMethod, cartItems } = cart
 
-  if (!cart.shippingAddress.address) {
-    navigate('/shipping')
-  } else if (!cart.paymentMethod) {
-    navigate('/payment')
-  }
+  // Order create state from Redux
+  const orderCreate = useSelector((state) => state.orderCreate)
+  const { order, success, error, loading } = orderCreate || {}
 
   // Calculate prices
   const addDecimals = (num) => {
@@ -24,7 +26,7 @@ const PlaceOrderScreen = () => {
   }
 
   cart.itemsPrice = addDecimals(
-    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+    cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
   )
   cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100)
   cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)))
@@ -34,22 +36,63 @@ const PlaceOrderScreen = () => {
     Number(cart.taxPrice)
   ).toFixed(2)
 
-  const placeOrderHandler = () => {
-    setOrderPlaced(true)
-  }
-
+  // Redirect if no shipping or payment info
   useEffect(() => {
-    if (orderPlaced) {
-      setTimeout(() => {
-        alert("Order placed successfully!")
-        navigate('/') // Redirect to homepage or another page after order is placed
-      }, 1000)
+    if (!shippingAddress.address) {
+      navigate('/shipping')
+    } else if (!paymentMethod) {
+      navigate('/payment')
     }
-  }, [orderPlaced, navigate])
+  }, [shippingAddress, paymentMethod, navigate])
+
+  // Handle successful order creation
+  useEffect(() => {
+    if (success && order) {
+      // Show success message
+      setShowSuccess(true)
+      
+      // Clear cart items from localStorage
+      localStorage.removeItem('cartItems')
+      
+      // Reset cart in Redux
+      dispatch({ type: CART_CLEAR_ITEMS })
+      
+      // Redirect to home page after 3 seconds
+      const timer = setTimeout(() => {
+        navigate('/')
+      }, 3000)
+      
+      // Clean up timeout if component unmounts
+      return () => clearTimeout(timer)
+    }
+  }, [success, order, navigate, dispatch])
+
+  const placeOrderHandler = () => {
+    // Create order
+    dispatch(
+      createOrder({
+        orderItems: cartItems,
+        shippingAddress: shippingAddress,
+        paymentMethod: paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        shippingPrice: cart.shippingPrice,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice,
+      })
+    )
+  }
 
   return (
     <>
       <CheckoutSteps step1 step2 step3 step4 />
+      
+      {/* Success Message */}
+      {showSuccess && (
+        <Message variant="success">
+          Order placed successfully! Redirecting to home page...
+        </Message>
+      )}
+      
       <Row>
         <Col md={8}>
           <ListGroup variant='flush'>
@@ -131,17 +174,21 @@ const PlaceOrderScreen = () => {
                   <Col>${cart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
-              <ListGroup.Item>
-                {orderPlaced && <Message variant='success'>Order placed successfully!</Message>}
-              </ListGroup.Item>
+              
+              {error && (
+                <ListGroup.Item>
+                  <Message variant='danger'>{error}</Message>
+                </ListGroup.Item>
+              )}
+              
               <ListGroup.Item>
                 <Button
                   type='button'
                   className='btn-block'
-                  disabled={cart.cartItems === 0}
+                  disabled={cart.cartItems.length === 0 || loading || showSuccess}
                   onClick={placeOrderHandler}
                 >
-                  Place Order
+                  {loading ? <Loader /> : 'Place Order'}
                 </Button>
               </ListGroup.Item>
             </ListGroup>
