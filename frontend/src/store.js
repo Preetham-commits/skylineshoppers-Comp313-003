@@ -12,7 +12,7 @@ import {
   productTopRatedReducer,
 } from './reducers/productReducers';
 
-import { userLoginReducer, userRegisterReducer } from './reducers/userReducers';
+import { userLoginReducer, userRegisterReducer, userDetailsReducer, userUpdateProfileReducer, userListReducer, userDeleteReducer } from './reducers/userReducers';
 import { cartReducer } from './reducers/cartReducers';  // Correct path to the cart reducer
 
 const reducer = combineReducers({
@@ -25,6 +25,10 @@ const reducer = combineReducers({
   productTopRated: productTopRatedReducer,
   userLogin: userLoginReducer,
   userRegister: userRegisterReducer,
+  userDetails: userDetailsReducer,
+  userUpdateProfile: userUpdateProfileReducer,
+  userList: userListReducer,
+  userDelete: userDeleteReducer,
   cart: cartReducer,  // Added cart reducer here
 });
 
