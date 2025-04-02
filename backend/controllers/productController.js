@@ -74,6 +74,9 @@ const createProduct = asyncHandler(async (req, res) => {
     rating: rating || 0
   })
 
+  // Log the product data before saving
+  console.log("Creating product with data:", product);
+
   const createdProduct = await product.save()
   res.status(201).json(createdProduct)
 })

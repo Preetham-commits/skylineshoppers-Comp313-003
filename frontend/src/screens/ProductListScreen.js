@@ -79,14 +79,19 @@ const ProductListScreen = () => {
 
   const createProductHandler = (e) => {
     e.preventDefault()  // Prevent default form submission
+    
+    // Convert price and countInStock to numbers
     const newProduct = {
       name,
-      price,
+      price: Number(price),
       image,
       brand,
       category,
-      countInStock,
+      countInStock: Number(countInStock),
+      description: "Product description"  // Adding a description field
     }
+    
+    console.log("Sending product data:", newProduct);
     dispatch(createProduct(newProduct))  
     setShowForm(false)  
   }
